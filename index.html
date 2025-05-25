@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gyan Path - Dynamic Lessons & AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #333;
+      --header-bg: #007BFF;
+      --header-text: #fff;
+      --sidebar-bg: #fff;
+      --sidebar-text: #333;
+      --section-bg: #fff;
+      --section-hover: #e6f7ff;
+      --subsection-hover: #0056b3;
+      --lesson-bg: #fff;
+      --lesson-text: #000;
+      --input-bg: #fff;
+      --input-border: #ccc;
+      --button-bg: #007BFF;
+      --button-text: #fff;
+      --chat-bg: #fff;
+      --chat-header-bg: #007BFF;
+      --user-msg-bg: #e1f5fe;
+      --ai-msg-bg: #f1f1f1;
+      --float-btn-bg: #007BFF;
+      --share-button-bg: #007BFF;
+      --lang-list-bg: #ffffff;
+      --lang-list-text: #333333;
+      --lang-list-hover-bg: #e6f7ff;
+      --lang-list-border: #dddddd;
+      --libre-translate-btn-bg: #ffc107; /* Yellow for LT */
+      --libre-translate-btn-text: #000;
+    }
+    .dark {
+      --bg-color: #121212;
+      --text-color: #eee;
+      --header-bg: #1f1f1f;
+      --header-text: #fff;
+      --sidebar-bg: #1e1e1e;
+      --sidebar-text: #eee;
+      --section-bg: #272727;
+      --section-hover: #333;
+      --subsection-hover: #002766;
+      --lesson-bg: #1a1a1a;
+      --lesson-text: #ddd;
+      --input-bg: #333;
+      --input-border: #555;
+      --button-bg: #0056b3;
+      --button-text: #eee;
+      --chat-bg: #1e1e1e;
+      --chat-header-bg: #1f1f1f;
+      --user-msg-bg: #003f5c;
+      --ai-msg-bg: #3a3a3a;
+      --float-btn-bg: #0056b3;
+      --share-button-bg: #0056b3;
+      --lang-list-bg: #272727;
+      --lang-list-text: #eeeeee;
+      --lang-list-hover-bg: #333333;
+      --lang-list-border: #444444;
+      --libre-translate-btn-bg: #cca300; /* Darker yellow for LT in dark mode */
+      --libre-translate-btn-text: #fff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color .3s, color .3s; }
+    header { background: var(--header-bg); color: var(--header-text); padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; height: 60px; }
+    .left-controls, .center-title, .right-controls { display: flex; align-items: center; position: relative; }
+    .center-title { flex: 1; justify-content: center; font-size: 1.25rem; font-weight: 600; text-align: center; margin-left: -70px; }
+    .center-title strong { margin-left: 10px; }
+    #menuBtn, #darkModeBtn, #translateBtn, #libreTranslateBtn { background: none; border: none; color: var(--header-text); font-size: 1.5rem; cursor: pointer; margin-left: 0.75rem; }
+    #translateBtn { margin-right: 0.5rem; }
+    #libreTranslateBtn {
+        font-size: 0.9rem; font-weight: bold; padding: 5px 8px; border-radius: 4px;
+        background-color: var(--libre-translate-btn-bg); color: var(--libre-translate-btn-text); line-height: 1;
+    }
+    #google_translate_element { position: absolute !important; top: -9999px !important; left: -9999px !important; z-index: -1 !important; display: none !important; }
+    .logo { width: 35px; height: 35px; vertical-align: middle; border-radius: 50%; margin-right: 8px; margin-left: 5px; }
+
+    #languageList {
+        position: absolute; top: 100%; right: 0; background-color: var(--lang-list-bg);
+        border: 1px solid var(--lang-list-border); border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        z-index: 1010; min-width: 150px; max-height: 300px; overflow-y: auto; display: none; margin-top: 5px;
+    }
+    #languageList.show { display: block; }
+    .lang-item { padding: 10px 15px; color: var(--lang-list-text); cursor: pointer; font-size: 0.9rem; white-space: nowrap; border-bottom: 1px solid var(--lang-list-border); }
+    .lang-item:last-child { border-bottom: none; }
+    .lang-item:hover { background-color: var(--lang-list-hover-bg); }
+    body > .skiptranslate > iframe.skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+
+    #sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--sidebar-bg); color: var(--sidebar-text); transition: left .3s; padding-top: 65px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 999; }
+    #sidebar.open { left: 0; }
+    #sidebar .section-header { padding: 1rem; border-bottom: 1px solid var(--input-border); cursor: pointer; font-weight: 600; background: var(--section-bg); text-transform: uppercase; }
+    #sidebar .section-header:hover { background: var(--section-hover); }
+    #sidebar .subsections { display: none; }
+    #sidebar .subsections.open { display: block; }
+    #sidebar .subsection { padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--input-border); cursor: pointer; background: var(--section-bg); text-transform: uppercase; }
+    #sidebar .subsection:hover { background: var(--subsection-hover); color: var(--header-text); }
+    #sidebar .lessons { display: none; padding-left: 2rem; background: var(--section-bg); }
+    #sidebar .lessons.open { display: block; }
+    #sidebar .lessons .lesson-item { padding: 0.5rem 1rem; border-bottom: 1px dashed var(--input-border); color: var(--lesson-text); cursor: pointer; }
+    #sidebar .lessons .lesson-item:hover { background: var(--section-hover); }
+    main { margin-top: 60px; padding: 1rem; transition: margin-left .3s; }
+    main.shifted { margin-left: 280px; }
+    .lesson-detail { background: var(--lesson-bg); color: var(--lesson-text); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1rem; }
+    .lesson-title { font-size: 1.75rem; margin-bottom: 0.75rem; font-weight: 700; color: var(--lesson-text); }
+    .lesson-subtitle { font-size: 1.1rem; color: #666; margin-bottom: 1.5rem; }
+    .dark .lesson-subtitle { color: #bbb; }
+
+    #wikipedia-search-container { display: flex; gap: 10px; margin-bottom: 1rem; padding: 1rem; background: var(--section-bg); border-radius: 5px; }
+    #wikiSearchInput { flex-grow: 1; padding: 0.75rem; border: 1px solid var(--input-border); border-radius: 4px; background-color: var(--input-bg); color: var(--text-color); font-size: 1rem; }
+    #wikiSearchBtn { padding: 0.75rem 1.5rem; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color 0.2s; }
+    #wikiSearchBtn:hover { background-color: var(--subsection-hover); }
+    #wikiResult { margin-top: 1rem; background: var(--lesson-bg); color: var(--lesson-text); padding: 1rem; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
+    #wikiResult h3 { margin-bottom: 0.5rem; }
+
+    #chatBtn { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: var(--float-btn-bg); color: white; border-radius: 50%; border: none; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; z-index: 1001; transition: background-color 0.3s; }
+    #chatBtn:hover { background-color: var(--subsection-hover); }
+    #chatWindow { position: fixed; bottom: 90px; right: 20px; width: 350px; max-height: 500px; background-color: var(--chat-bg); border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; flex-direction: column; overflow: hidden; z-index: 1002; border: 1px solid var(--input-border); }
+    #chatWindow.open { display: flex; }
+    #chatHeader { background-color: var(--chat-header-bg); color: var(--header-text); padding: 10px 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    #chatHeader span { flex-grow: 1; }
+    #clearChatHistoryBtn { background: none; border: none; color: var(--header-text); font-size: 1.2rem; cursor: pointer; margin-right: 10px; }
+    #closeChatBtn { background: none; border: none; color: var(--header-text); font-size: 1.5rem; cursor: pointer; }
+    #chatMessages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .message { padding: 8px 12px; border-radius: 15px; max-width: 80%; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
+    .user-message { background-color: var(--user-msg-bg); color: var(--text-color); align-self: flex-end; border-bottom-right-radius: 5px; }
+    .dark .user-message { color: #eee; }
+    .ai-message { background-color: var(--ai-msg-bg); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 5px; }
+    .message.loading { font-style: italic; color: #888; }
+    .dark .message.loading { color: #bbb; }
+    #chatInputContainer { display: flex; padding: 10px; border-top: 1px solid var(--input-border); background-color: var(--sidebar-bg); }
+    #chatInput { flex-grow: 1; padding: 10px; border: 1px solid var(--input-border); border-radius: 20px; background-color: var(--input-bg); color: var(--text-color); margin-right: 10px; font-size: 0.95rem; }
+    #sendChatBtn { padding: 10px 15px; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
+    #sendChatBtn:hover { background-color: var(--subsection-hover); }
+
+    .share-button { display: inline-block; padding: 10px 20px; background-color: var(--share-button-bg); color: var(--button-text); text-decoration: none; border-radius: 5px; border: none; cursor: pointer; font-size: 1rem; margin-top: 1rem; margin-right: 10px; transition: background-color 0.2s; }
+    .share-button:hover { background-color: var(--subsection-hover); }
+    .share-links a { text-decoration: none; padding: 8px 15px; color: white; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
+    #copyStatus { margin-top: 10px; font-size: 0.9em; color: var(--text-color); height: 1.2em; }
+    
+    .donation-options div { background-color: var(--section-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--input-border); margin-bottom: 10px; }
+    .donation-options h3 { margin-top: 0; margin-bottom: 8px; color: var(--text-color); }
+    .donation-options p { margin-bottom: 12px; font-size: 0.95rem; }
+
+    @media (max-width: 768px) {
+        #sidebar { width: 250px; left: -250px; }
+        main.shifted { margin-left: 0; }
+        #sidebar.open { box-shadow: 4px 0 10px rgba(0,0,0,0.2); }
+        #chatWindow { width: 90%; max-width: 350px; bottom: 70px; right: 5%; }
+        #chatBtn { width: 50px; height: 50px; font-size: 1.5rem; bottom: 15px; right: 15px; }
+        .center-title { font-size: 1.1rem; margin-left: -60px; }
+        .logo { width: 30px; height: 30px; }
+        #languageList { min-width: 130px; }
+        .lang-item { padding: 8px 12px; }
+    }
+    @media (max-width: 480px) {
+       header { padding: 0.8rem 1rem; height: 55px; }
+       .center-title { display: none; }
+       .left-controls { flex-grow: 1; }
+       #menuBtn, #darkModeBtn { font-size: 1.3rem; margin-left: 0.5rem;}
+       #translateBtn, #libreTranslateBtn { font-size: 1.3rem; }
+       #libreTranslateBtn { font-size: 0.8rem; padding: 4px 6px; }
+       .logo { margin-left: 10px; width: 28px; height: 28px; }
+       main { padding: 0.5rem; margin-top: 55px; }
+       .lesson-detail { padding: 1rem; }
+       .lesson-title { font-size: 1.5rem; }
+       .lesson-subtitle { font-size: 1rem; }
+       #wikipedia-search-container { flex-direction: column; }
+       #wikiSearchBtn { width: 100%; margin-top: 5px; }
+       #languageList { right: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="left-controls">
+      <button id="menuBtn" title="Toggle Menu">☰</button>
+      <img class="logo" src="https://blogger.googleusercontent.com/img/a/AVvXsEgtiOL4nrHj6wprSUetDfd2tKLsiPFBxHAcrrCTOKrgbR6y_aszoSZu4OvFaRRSoAcQ0bRiCKnPUEtUJ-yBFc_NCaOdElHDaOZOklntVNr2M0LtsXnj7eaMyw69ek8zhGLajtFJugaBX2c7MeW_fqh-bKoZrIYu3V0JcPxQuo_PjlSf_J8CBDtU7L8rqqc" alt="Gyan Path Logo">
+      <button id="darkModeBtn" title="Toggle Dark Mode">🌙</button>
+    </div>
+    <div class="center-title">
+        <strong>Gyan Path</strong>
+    </div>
+    <div class="right-controls">
+      <button id="libreTranslateBtn" title="Translate Content (Lingva/Libre via Backend)">LT</button>
+      <button id="translateBtn" title="Translate Page (Google)">🌐</button>
+      <div id="languageList">
+          <!-- Language items for Google Translate -->
+      </div>
+    </div>
+  </header>
+
+  <div id="google_translate_element"></div>
+
+  <aside id="sidebar">
+    <!-- Science -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-science')">SCIENCE</div>
+      <div id="sec-science" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-bio')">BIOLOGY</div>
+        <div id="les-bio" class="lessons">
+          <div class="lesson-item" onclick="showDetail('biology','bio1')">Cell Structure</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio2')">Photosynthesis</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio3')">Respiration</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio4')">Genetics Basics</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio5')">Ecosystems</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio6')">Human Anatomy</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio7')">Plant Physiology</div>
+          <div class="lesson-item" onclick="showDetail('biology','bio8')">Evolution</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-chem')">CHEMISTRY</div>
+        <div id="les-chem" class="lessons">
+          <div class="lesson-item" onclick="showDetail('chemistry','chem1')">Atoms & Molecules</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem2')">Chemical Bonds</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem3')">Chemical Reactions</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem4')">Organic Chemistry I</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem5')">Inorganic Chemistry I</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem6')">Physical Chemistry I</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem7')">Solutions</div>
+          <div class="lesson-item" onclick="showDetail('chemistry','chem8')">Thermochemistry</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-phy')">PHYSICS</div>
+        <div id="les-phy" class="lessons">
+          <div class="lesson-item" onclick="showDetail('physics','phy1')">Motion</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy2')">Forces</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy3')">Energy</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy4')">Waves</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy5')">Optics</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy6')">Thermodynamics</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy7')">Electricity & Magnetism I</div>
+          <div class="lesson-item" onclick="showDetail('physics','phy8')">Modern Physics</div>
+        </div>
+      </div>
+    </div>
+    <!-- Mathematics -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-math')">MATHEMATICS</div>
+      <div id="sec-math" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-alg')">ALGEBRA</div>
+        <div id="les-alg" class="lessons">
+          <div class="lesson-item" onclick="showDetail('algebra','alg1')">Linear Equations</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg2')">Quadratic Equations</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg3')">Polynomials</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg4')">Inequalities</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg5')">Matrices</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg6')">Sequences & Series</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg7')">Complex Numbers</div>
+          <div class="lesson-item" onclick="showDetail('algebra','alg8')">Logarithms</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-geo')">GEOMETRY</div>
+        <div id="les-geo" class="lessons">
+          <div class="lesson-item" onclick="showDetail('geometry','geo1')">Triangles</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo2')">Circles</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo3')">Polygons</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo4')">Coordinate Geometry</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo5')">Solid Geometry</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo6')">Trigonometry Basics</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo7')">Vectors</div>
+          <div class="lesson-item" onclick="showDetail('geometry','geo8')">Transformations</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-cal')">CALCULUS</div>
+        <div id="les-cal" class="lessons">
+          <div class="lesson-item" onclick="showDetail('calculus','cal1')">Derivatives</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal2')">Integrals</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal3')">Limits</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal4')">Differential Equations</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal5')">Multivariable Calculus</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal6')">Sequences & Series of Functions</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal7')">Applications of Derivatives</div>
+          <div class="lesson-item" onclick="showDetail('calculus','cal8')">Applications of Integrals</div>
+        </div>
+      </div>
+    </div>
+    <!-- Social Science -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-social')">SOCIAL SCIENCE</div>
+      <div id="sec-social" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-hist')">HISTORY</div>
+        <div id="les-hist" class="lessons">
+          <div class="lesson-item" onclick="showDetail('history','hist1')">Ancient India</div>
+          <div class="lesson-item" onclick="showDetail('history','hist2')">Medieval India</div>
+          <div class="lesson-item" onclick="showDetail('history','hist3')">Modern India</div>
+          <div class="lesson-item" onclick="showDetail('history','hist4')">World History I</div>
+          <div class="lesson-item" onclick="showDetail('history','hist5')">World History II</div>
+          <div class="lesson-item" onclick="showDetail('history','hist6')">Indian National Movement</div>
+          <div class="lesson-item" onclick="showDetail('history','hist7')">Post-Independence India</div>
+          <div class="lesson-item" onclick="showDetail('history','hist8')">Historical Theories</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-geo-soc')">GEOGRAPHY</div>
+        <div id="les-geo-soc" class="lessons">
+          <div class="lesson-item" onclick="showDetail('geography','geosoc1')">Physical Features</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc2')">Climate and Vegetation</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc3')">Natural Resources</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc4')">Human Geography</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc5')">Economic Geography</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc6')">Environmental Geography</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc7')">Map Reading</div>
+          <div class="lesson-item" onclick="showDetail('geography','geosoc8')">GIS Basics</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-civ')">CIVICS</div>
+        <div id="les-civ" class="lessons">
+          <div class="lesson-item" onclick="showDetail('civics','civ1')">Constitution</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ2')">Government Types</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ3')">Rights and Duties</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ4')">Democracy</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ5')">Federalism</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ6')">Local Government</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ7')">International Relations</div>
+          <div class="lesson-item" onclick="showDetail('civics','civ8')">Social Justice</div>
+        </div>
+      </div>
+    </div>
+    <!-- Language -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-lang')">LANGUAGE</div>
+      <div id="sec-lang" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-eng')">ENGLISH</div>
+        <div id="les-eng" class="lessons">
+          <div class="lesson-item" onclick="showDetail('english','eng1')">Tenses</div>
+          <div class="lesson-item" onclick="showDetail('english','eng2')">Narration</div>
+          <div class="lesson-item" onclick="showDetail('english','eng3')">Voice Change</div>
+          <div class="lesson-item" onclick="showDetail('english','eng4')">Grammar Basics</div>
+          <div class="lesson-item" onclick="showDetail('english','eng5')">Vocabulary Building</div>
+          <div class="lesson-item" onclick="showDetail('english','eng6')">Reading Comprehension</div>
+          <div class="lesson-item" onclick="showDetail('english','eng7')">Writing Skills</div>
+          <div class="lesson-item" onclick="showDetail('english','eng8')">Literary Terms</div>
+          <div class="lesson-item" onclick="showDetail('english','eng9')">Noun</div>
+          <div class="lesson-item" onclick="showDetail('english','eng10')">Pronoun</div>
+          <div class="lesson-item" onclick="showDetail('english','eng11')">Verb</div>
+          <div class="lesson-item" onclick="showDetail('english','eng12')">Adjective</div>
+          <div class="lesson-item" onclick="showDetail('english','eng13')">Adverb</div>
+          <div class="lesson-item" onclick="showDetail('english','eng14')">Preposition</div>
+          <div class="lesson-item" onclick="showDetail('english','eng15')">Conjunction</div>
+          <div class="lesson-item" onclick="showDetail('english','eng16')">Interjection</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-hin')">HINDI</div>
+        <div id="les-hin" class="lessons">
+          <div class="lesson-item" onclick="showDetail('hindi','hin1')">अलंकार</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin2')">समास</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin3')">उपसर्ग और प्रत्यय</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin4')">संधि</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin5')">विलोम शब्द</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin6')">पर्यायवाची शब्द</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin7')">मुहावरे और लोकोक्तियाँ</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin8')">पत्र लेखन</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin9')">संज्ञा</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin10')">सर्वनाम</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin11')">क्रिया</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin12')">विशेषण</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin13')">क्रियाविशेषण</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin14')">संबंधबोधक</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin15')">समुच्चयबोधक</div>
+          <div class="lesson-item" onclick="showDetail('hindi','hin16')">विस्मयादिबोधक</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-san')">SANSKRIT</div>
+        <div id="les-san" class="lessons">
+          <div class="lesson-item" onclick="showDetail('sanskrit','san1')">धातुरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san2')">विभक्ति प्रयोग</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san3')">संधि</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san4')">कारक</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san5')">समास</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san6')">प्रत्यय</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san7')">उपसर्ग</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san8')">अव्यय</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san9')">राम शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san10')">लता शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san11')">मुनि शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san12')">नदी शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san13')">भानु शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san14')">धेनु शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san15')">पितृ शब्दरूप</div>
+          <div class="lesson-item" onclick="showDetail('sanskrit','san16')">मातृ शब्दरूप</div>
+        </div>
+      </div>
+    </div>
+    <!-- Computer -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-comp')">COMPUTER</div>
+      <div id="sec-comp" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-html')">HTML</div>
+        <div id="les-html" class="lessons">
+          <div class="lesson-item" onclick="showDetail('html','html1')">Basic Tags</div>
+          <div class="lesson-item" onclick="showDetail('html','html2')">Forms</div>
+          <div class="lesson-item" onclick="showDetail('html','html3')">Media Elements</div>
+          <div class="lesson-item" onclick="showDetail('html','html4')">Semantic HTML</div>
+          <div class="lesson-item" onclick="showDetail('html','html5')">HTML5 APIs</div>
+          <div class="lesson-item" onclick="showDetail('html','html6')">Accessibility</div>
+          <div class="lesson-item" onclick="showDetail('html','html7')">SEO Basics</div>
+          <div class="lesson-item" onclick="showDetail('html','html8')">Best Practices</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-css')">CSS</div>
+        <div id="les-css" class="lessons">
+          <div class="lesson-item" onclick="showDetail('css','css1')">Selectors</div>
+          <div class="lesson-item" onclick="showDetail('css','css2')">Box Model</div>
+          <div class="lesson-item" onclick="showDetail('css','css3')">Flexbox/Grid</div>
+          <div class="lesson-item" onclick="showDetail('css','css4')">Responsive Design</div>
+          <div class="lesson-item" onclick="showDetail('css','css5')">Animations & Transitions</div>
+          <div class="lesson-item" onclick="showDetail('css','css6')">CSS Frameworks</div>
+          <div class="lesson-item" onclick="showDetail('css','css7')">Advanced Selectors</div>
+          <div class="lesson-item" onclick="showDetail('css','css8')">Performance Optimization</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-js')">JAVASCRIPT</div>
+        <div id="les-js" class="lessons">
+          <div class="lesson-item" onclick="showDetail('javascript','js1')">Variables & Data Types</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js2')">Functions</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js3')">DOM Manipulation</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js4')">Events</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js5')">Asynchronous JavaScript</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js6')">ES6+ Features</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js7')">Frameworks & Libraries</div>
+          <div class="lesson-item" onclick="showDetail('javascript','js8')">Testing & Debugging</div>
+        </div>
+      </div>
+    </div>
+    <!-- Mind Science -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-mind')">MIND SCIENCE & MEMORY MASTERY</div>
+      <div id="sec-mind" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-mindsci')">MIND SCIENCE</div>
+        <div id="les-mindsci" class="lessons">
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci1')">Conscious vs Subconscious</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci2')">Brain Waves</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci3')">Thought Energy</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci4')">Neuroplasticity</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci5')">Cognitive Biases</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci6')">Emotional Intelligence</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci7')">Mindfulness & Meditation</div>
+          <div class="lesson-item" onclick="showDetail('mindscience','mindsci8')">Hypnosis Basics</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-memory')">MEMORY MASTERY</div>
+        <div id="les-memory" class="lessons">
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory1')">Memory Palace</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory2')">Mnemonics</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory3')">Study Hacks</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory4')">Spaced Repetition</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory5')">Active Recall</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory6')">Speed Reading Techniques</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory7')">Mind Mapping</div>
+          <div class="lesson-item" onclick="showDetail('memorymastery','memory8')">Long-Term Memory Strategies</div>
+        </div>
+      </div>
+    </div>
+    <!-- Stories -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-story')">STORIES</div>
+      <div id="sec-story" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-short-story')">SHORT STORIES</div>
+        <div id="les-short-story" class="lessons">
+          <div class="lesson-item" onclick="showDetail('story','short1')">The Old Man and the Sea</div>
+          <div class="lesson-item" onclick="showDetail('story','short2')">The Gift of the Magi</div>
+          <div class="lesson-item" onclick="showDetail('story','short3')">A Retrieved Reformation</div>
+          <div class="lesson-item" onclick="showDetail('story','short4')">The Tell-Tale Heart</div>
+          <div class="lesson-item" onclick="showDetail('story','short5')">The Lottery</div>
+          <div class="lesson-item" onclick="showDetail('story','short6')">Hills Like White Elephants</div>
+          <div class="lesson-item" onclick="showDetail('story','short7')">The Necklace</div>
+          <div class="lesson-item" onclick="showDetail('story','short8')">The Last Leaf</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-moral-story')">MORAL STORIES</div>
+        <div id="les-moral-story" class="lessons">
+          <div class="lesson-item" onclick="showDetail('story','moral1')">The Tortoise and the Hare</div>
+          <div class="lesson-item" onclick="showDetail('story','moral2')">The Boy Who Cried Wolf</div>
+          <div class="lesson-item" onclick="showDetail('story','moral3')">The Lion and the Mouse</div>
+          <div class="lesson-item" onclick="showDetail('story','moral4')">The Ant and the Grasshopper</div>
+          <div class="lesson-item" onclick="showDetail('story','moral5')">The Fox and the Grapes</div>
+          <div class="lesson-item" onclick="showDetail('story','moral6')">The Goose That Laid the Golden Eggs</div>
+          <div class="lesson-item" onclick="showDetail('story','moral7')">Two Friends and a Bear</div>
+          <div class="lesson-item" onclick="showDetail('story','moral8')">The Honest Woodcutter</div>
+        </div>
+      </div>
+    </div>
+    <!-- Thoughts -->
+    <div class="section">
+      <div class="section-header" onclick="toggleSubsections('sec-thoughts')">THOUGHTS</div>
+      <div id="sec-thoughts" class="subsections">
+        <div class="subsection" onclick="toggleLessons('les-inspirational')">INSPIRATIONAL</div>
+        <div id="les-inspirational" class="lessons">
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire1')">Believe in Yourself</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire2')">Never Give Up</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire3')">Follow Your Dreams</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire4')">The Power of Positivity</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire5')">Embrace Change</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire6')">Learn from Failure</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire7')">Be Kind to Others</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','inspire8')">Make a Difference</div>
+        </div>
+        <div class="subsection" onclick="toggleLessons('les-philosophical')">PHILOSOPHICAL</div>
+        <div id="les-philosophical" class="lessons">
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy1')">The Meaning of Life</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy2')">Ethics and Morality</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy3')">The Nature of Reality</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy4')">Free Will vs Determinism</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy5')">The Concept of Time</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy6')">The Existence of God</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy7')">Consciousness</div>
+          <div class="lesson-item" onclick="showDetail('thoughts','philosophy8')">Logic and Reasoning</div>
+        </div>
+      </div>
+    </div>
+    <!-- Other Sections -->
+    <div class="section">
+      <div class="section-header" onclick="showShareOptions()">SHARE APP</div>
+    </div>
+    <div class="section">
+      <div class="section-header" onclick="showDonation()">DONATION</div>
+    </div>
+    <div class="section">
+      <div class="section-header" onclick="showPrivacyPolicy()">PRIVACY POLICY</div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="wikipedia-search-container">
+      <input type="text" id="wikiSearchInput" placeholder="Search Wikipedia...">
+      <button id="wikiSearchBtn" title="Search Wikipedia">Search</button>
+    </div>
+    <div id="main-content-area">
+        <!-- Initial Welcome Message will be populated by JS -->
+    </div>
+  </main>
+
+  <button id="chatBtn" title="Open AI Chat">💬</button>
+  <div id="chatWindow">
+    <div id="chatHeader">
+      <span>AI Assistant</span>
+      <button id="clearChatHistoryBtn" title="Clear Chat History">🗑️</button>
+      <button id="closeChatBtn" title="Close Chat">×</button>
+    </div>
+    <div id="chatMessages">
+      <!-- Chat messages will appear here -->
+    </div>
+    <div id="chatInputContainer">
+      <input type="text" id="chatInput" placeholder="Type your message...">
+      <button id="sendChatBtn" title="Send Message">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&exintro&explaintext&redirects=1&origin=*&titles=";
+    // IMPORTANT: Replace with your ACTUAL deployed Google Apps Script URL
+    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbzstXa3L6xLmvUoQ7FTZ69krRMXjpAodjEhV89gY8KAndXQpxF7Ny8atbZusBB1T7Tm/exec"; // THIS URL HANDLES BOTH CHAT & TRANSLATE
+    const MAX_CHAT_HISTORY = 50;
+
+    // --- DOM Elements ---
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main');
+    const mainContentArea = document.getElementById('main-content-area');
+    const menuBtn = document.getElementById('menuBtn');
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    const googleTranslateBtn = document.getElementById('translateBtn');
+    const libreTranslateBtn = document.getElementById('libreTranslateBtn'); // For backend translation
+    const googleTranslateElement = document.getElementById('google_translate_element');
+    const languageList = document.getElementById('languageList');
+    const wikiSearchInput = document.getElementById('wikiSearchInput');
+    const wikiSearchBtn = document.getElementById('wikiSearchBtn');
+    const chatBtn = document.getElementById('chatBtn');
+    const chatWindow = document.getElementById('chatWindow');
+    const clearChatHistoryBtn = document.getElementById('clearChatHistoryBtn');
+    const closeChatBtn = document.getElementById('closeChatBtn');
+    const chatMessagesContainer = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendChatBtn = document.getElementById('sendChatBtn');
+
+    let chatHistory = [];
+    let chatRendered = false; // To track if chat DOM is populated
+
+    // --- Sidebar Toggle ---
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+      languageList.classList.remove('show');
+      if (window.innerWidth > 768) {
+         mainContent.classList.toggle('shifted', sidebar.classList.contains('open'));
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('open');
+        if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+      }
+      if (languageList.classList.contains('show') && !languageList.contains(e.target) && !googleTranslateBtn.contains(e.target)) {
+        languageList.classList.remove('show');
+       }
+    });
+
+    // --- Dark Mode ---
+    const applyTheme = (theme) => {
+        document.body.classList.toggle('dark', theme === 'dark');
+        darkModeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        darkModeBtn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    };
+    const userPreferredTheme = localStorage.getItem('theme');
+    const systemPreferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    applyTheme(userPreferredTheme || systemPreferredTheme);
+
+    darkModeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+      languageList.classList.remove('show');
+    });
+
+    // --- Google Translate ---
+    const googleLanguages = [
+        { code: 'en', name: 'English' }, { code: 'hi', name: 'हिन्दी (Hindi)' },
+        { code: 'es', name: 'Español (Spanish)' }, { code: 'fr', name: 'Français (French)' },
+        { code: 'de', name: 'Deutsch (German)' }, { code: 'ja', name: '日本語 (Japanese)' },
+        { code: 'ko', name: '한국어 (Korean)' }, { code: 'pt', name: 'Português (Portuguese)' },
+        { code: 'ru', name: 'Русский (Russian)' }, { code: 'zh-CN', name: '中文 (简体)' },
+        { code: 'ar', name: 'العربية (Arabic)' }, { code: 'bn', name: 'বাংলা (Bengali)' },
+        { code: 'te', name: 'తెలుగు (Telugu)' }, { code: 'mr', name: 'मराठी (Marathi)' },
+        { code: 'ta', name: 'தமிழ் (Tamil)' }, { code: 'ur', name: 'اردو (Urdu)' },
+        { code: '', name: 'Original Language' } // Represents 'auto' or revert
+    ];
+
+    function populateLanguageList() {
+        languageList.innerHTML = '';
+        googleLanguages.forEach(lang => {
+            const item = document.createElement('div');
+            item.classList.add('lang-item');
+            item.textContent = lang.name;
+            item.dataset.langCode = lang.code;
+            item.addEventListener('click', handleGoogleLanguageSelect);
+            languageList.appendChild(item);
+        });
+    }
+
+    function handleGoogleLanguageSelect(event) {
+        const langCode = event.target.dataset.langCode;
+        languageList.classList.remove('show');
+        const googleTranslateSelect = document.querySelector('#google_translate_element select.goog-te-combo');
+        if (googleTranslateSelect) {
+            googleTranslateSelect.value = langCode; // '' is fine for 'Original'
+            googleTranslateSelect.dispatchEvent(new Event('change'));
+            localStorage.setItem('userSelectedGoogleLanguage', langCode === '' ? 'auto' : langCode);
+        } else {
+            console.error('Google Translate select element not found.');
+        }
+    }
+
+    googleTranslateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.remove('open');
+        if (window.innerWidth > 768 && mainContent.classList.contains('shifted')) {
+             mainContent.classList.remove('shifted');
+        }
+        languageList.classList.toggle('show');
+    });
+
+    function googleTranslateElementInit() {
+      try {
+          new google.translate.TranslateElement(
+              { pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false },
+              'google_translate_element'
+          );
+          googleTranslateElement.style.display = 'none';
+           const style = document.createElement('style');
+           style.innerHTML = `body > .skiptranslate { display: none !important; } body { top: 0 !important; } .goog-te-banner-frame { display: none !important; }`;
+           document.head.appendChild(style);
+           
+           setTimeout(() => {
+                populateLanguageList();
+                const userSelectedLang = localStorage.getItem('userSelectedGoogleLanguage');
+                const gtSelect = document.querySelector('#google_translate_element select.goog-te-combo');
+                
+                if (gtSelect) {
+                    if (userSelectedLang !== null) { // User has made a choice (even 'auto')
+                        gtSelect.value = (userSelectedLang === 'auto' || userSelectedLang === '') ? '' : userSelectedLang;
+                    } else { // No choice ever made, default to Hindi
+                        gtSelect.value = 'hi';
+                    }
+                    if (gtSelect.value) { // Only trigger if a language is actually selected (not empty default)
+                         gtSelect.dispatchEvent(new Event('change'));
+                    } else if (gtSelect.value === '' && userSelectedLang === 'auto') { // Specifically chose original
+                         gtSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+           }, 700);
+
+      } catch (error) {
+          console.error("Google Translate init failed:", error);
+          googleTranslateBtn.disabled = true;
+          googleTranslateBtn.title = "Google Translation unavailable";
+      }
+    }
+
+    // --- Backend Translation (Lingva/Libre via Apps Script) ---
+    async function translateContentWithBackend(targetLang = 'hi') {
+        let elementsToProcess = Array.from(mainContentArea.querySelectorAll('[data-english-text]'));
+        let translatingFromEnglishDataset = true;
+        let initialSourceLanguage = 'en'; // Default for dataset items
+
+        if (elementsToProcess.length === 0) {
+            elementsToProcess = Array.from(mainContentArea.querySelectorAll(
+                '.lesson-detail .lesson-title, .lesson-detail .lesson-subtitle, .lesson-detail > div > p, .lesson-detail > p:not(.lesson-subtitle),' +
+                '#wikiResult h3, #wikiResult p'
+            ));
+            translatingFromEnglishDataset = false;
+            if (elementsToProcess.length === 0) {
+                alert("No translatable text content found in the main area.");
+                return;
+            }
+            initialSourceLanguage = (document.documentElement.lang || 'en').split('-')[0];
+            if (!confirm(`No specific English text markers found. Translate current visible text? (Detected source: '${initialSourceLanguage}')`)) {
+                return;
+            }
+        }
+
+        addChatMessageToDOM(`Translating content to ${targetLang} using backend...`, 'ai');
+        const originalButtonText = libreTranslateBtn.textContent;
+        libreTranslateBtn.innerHTML = `<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`; // Simple CSS loading dots
+        libreTranslateBtn.disabled = true;
+        // Add CSS for loading-dots if you want visual feedback on the button itself
+        // e.g., in your <style> tag:
+        // .loading-dots span { animation: blink 1.4s infinite both; }
+        // .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        // .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        // @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+
+        try {
+            for (const el of elementsToProcess) {
+                let textToTranslate;
+                let sourceForThisSegment;
+
+                if (translatingFromEnglishDataset) {
+                    textToTranslate = el.dataset.englishText;
+                    sourceForThisSegment = 'en'; // Marked English text always has 'en' as source
+                } else {
+                    // If we are in fallback mode, store the current visible text as a temporary original
+                    // in case of partial failure or if we want to revert this specific translation action.
+                    if (!el.dataset.currentVisibleText) el.dataset.currentVisibleText = el.innerText;
+                    textToTranslate = el.dataset.currentVisibleText;
+                    sourceForThisSegment = initialSourceLanguage;
+                }
+
+                if (!textToTranslate || !textToTranslate.trim()) continue;
+
+                const response = await fetch(BACKEND_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: "translate",
+                        text: textToTranslate,
+                        source: sourceForThisSegment,
+                        target: targetLang
+                    })
+                });
+
+                const data = await response.json(); // Try to parse JSON regardless of status for error messages
+
+                if (!response.ok) {
+                    console.error(`Backend translation error for segment: ${data.error || response.statusText}`);
+                    // Optionally mark problematic segment: el.style.border = "1px dashed red";
+                    continue; // Skip to next element on error
+                }
+
+                if (data.translatedText) {
+                    el.innerText = data.translatedText;
+                } else if (data.error) {
+                    console.warn(`Translation warning for segment: ${data.error}`);
+                    // el.innerText += ` [Tr.Warn: ${data.error.substring(0,30)}]`;
+                }
+            }
+            addChatMessageToDOM(`Content translation to ${targetLang} attempt complete. Check content for results.`, 'ai');
+        } catch (error) {
+            console.error("Backend translation fetch/overall error:", error);
+            addChatMessageToDOM(`Backend translation failed: ${error.message}`, 'ai');
+        } finally {
+            libreTranslateBtn.textContent = originalButtonText;
+            libreTranslateBtn.disabled = false;
+        }
+    }
+
+    libreTranslateBtn.addEventListener('click', () => {
+        let target = 'hi'; // Default target for backend translation
+        const currentGoogleLang = document.querySelector('#google_translate_element select.goog-te-combo')?.value;
+        if (currentGoogleLang && currentGoogleLang !== 'en' && currentGoogleLang !== '') {
+            target = currentGoogleLang; // Align with Google Translate's target if set
+        }
+        // Example: Prompt user for target language
+        // const userTargetLang = prompt("Enter target language code for backend translation (e.g., es, fr, de, hi):", target);
+        // if (userTargetLang) {
+        //    translateContentWithBackend(userTargetLang);
+        // } else {
+             translateContentWithBackend(target); // Use default or Google's current target
+        // }
+    });
+
+    // --- Helper to close popups ---
+    function closePopups() {
+        languageList.classList.remove('show');
+    }
+
+    // --- Update Main Content Area ---
+    function updateMainContent(html, isLessonOrWiki = false) {
+        mainContentArea.innerHTML = html;
+        mainContent.scrollTop = 0;
+        closePopups();
+
+        if (isLessonOrWiki) {
+            // Tagging elements for backend translation
+            mainContentArea.querySelectorAll(
+                '.lesson-detail .lesson-title, .lesson-detail .lesson-subtitle, .lesson-detail > div > p, .lesson-detail > p:not(.lesson-subtitle)'
+            ).forEach(el => {
+                if (el.innerText.trim()) el.dataset.englishText = el.innerText.trim();
+            });
+            mainContentArea.querySelectorAll('#wikiResult h3, #wikiResult p')
+                .forEach(el => {
+                    if (el.innerText.trim()) el.dataset.englishText = el.innerText.trim();
+                });
+        }
+    }
+
+    // --- Lesson Data (This should be your full data object) ---
+    const data = { /* ... Your extensive lesson data object as provided before ... */ 
+       biology: [ { subsection: 'Biology', lessons: [ { id: 'bio1', title: 'Cell Structure', subtitle: 'Understanding cell components', content: 'Detailed content about Cell Structure including organelles like nucleus, mitochondria, cytoplasm, cell membrane, and their functions. We will also discuss differences between plant and animal cells.' }, { id: 'bio2', title: 'Photosynthesis', subtitle: 'Energy conversion in plants', content: 'Explore the process of photosynthesis: light-dependent and light-independent reactions, chlorophyll, and how plants produce glucose and oxygen.' }, { id: 'bio3', title: 'Respiration', subtitle: 'Energy release in organisms', content: 'Cellular respiration: glycolysis, Krebs cycle, and electron transport chain. Aerobic vs. anaerobic respiration.' }, { id: 'bio4', title: 'Genetics Basics', subtitle: 'Introduction to heredity', content: 'Mendelian genetics, DNA structure, genes, alleles, chromosomes, and basic inheritance patterns.' }, { id: 'bio5', title: 'Ecosystems', subtitle: 'Interactions in nature', content: 'Components of an ecosystem, food chains, food webs, energy flow, and nutrient cycling.' }, { id: 'bio6', title: 'Human Anatomy', subtitle: 'Overview of the human body', content: 'Introduction to major organ systems: skeletal, muscular, circulatory, respiratory, digestive, nervous, endocrine, etc.' }, { id: 'bio7', title: 'Plant Physiology', subtitle: 'How plants function', content: 'Water transport (transpiration), nutrient uptake, plant hormones, and growth responses.' }, { id: 'bio8', title: 'Evolution', subtitle: 'The process of change over time', content: 'Darwin\'s theory of natural selection, evidence for evolution, speciation, and human evolution.' }, ] } ],
+       chemistry: [ { subsection: 'Chemistry', lessons: [ { id: 'chem1', title: 'Atoms & Molecules', subtitle: 'Building blocks of matter', content: 'Atomic structure (protons, neutrons, electrons), isotopes, formation of molecules, and chemical formulas.' }, { id: 'chem2', title: 'Chemical Bonds', subtitle: 'How atoms connect', content: 'Ionic bonds, covalent bonds (polar and nonpolar), metallic bonds, and intermolecular forces.' }, { id: 'chem3', title: 'Chemical Reactions', subtitle: 'Changes in matter', content: 'Types of chemical reactions (synthesis, decomposition, single/double displacement, combustion), balancing equations, and stoichiometry basics.' }, { id: 'chem4', title: 'Organic Chemistry I', subtitle: 'Carbon compounds', content: 'Introduction to hydrocarbons (alkanes, alkenes, alkynes), functional groups, and basic nomenclature.' }, { id: 'chem5', title: 'Inorganic Chemistry I', subtitle: 'Non-carbon compounds', content: 'Study of main group elements, transition metals, coordination compounds, and their properties.' }, { id: 'chem6', title: 'Physical Chemistry I', subtitle: 'Principles of chemistry', content: 'Thermodynamics (enthalpy, entropy, Gibbs free energy), chemical kinetics (rate laws, activation energy), and chemical equilibrium.' }, { id: 'chem7', title: 'Solutions', subtitle: 'Mixtures at the molecular level', content: 'Concentration units (molarity, molality), solubility, colligative properties, acids, bases, and pH.' }, { id: 'chem8', title: 'Thermochemistry', subtitle: 'Heat in chemical reactions', content: 'Heat capacity, specific heat, calorimetry, Hess\'s Law, and standard enthalpies of formation.' }, ] } ],
+       physics: [ { subsection: 'Physics', lessons: [ { id: 'phy1', title: 'Motion', subtitle: 'Description of movement', content: 'Kinematics: displacement, velocity, acceleration, equations of motion, projectile motion.' }, { id: 'phy2', title: 'Forces', subtitle: 'Interactions causing change', content: 'Newton\'s Laws of Motion, types of forces (gravity, friction, normal force), free-body diagrams.' }, { id: 'phy3', title: 'Energy', subtitle: 'Capacity to do work', content: 'Work, kinetic energy, potential energy, conservation of energy, power.' }, { id: 'phy4', title: 'Waves', subtitle: 'Disturbances propagating energy', content: 'Types of waves (transverse, longitudinal), properties (wavelength, frequency, amplitude, speed), superposition, interference, diffraction.' }, { id: 'phy5', title: 'Optics', subtitle: 'The study of light', content: 'Reflection, refraction, lenses, mirrors, human eye, wave nature of light, electromagnetic spectrum.' }, { id: 'phy6', title: 'Thermodynamics', subtitle: 'Heat and energy transfer', content: 'Laws of thermodynamics, heat engines, entropy, temperature, specific heat.' }, { id: 'phy7', title: 'Electricity & Magnetism I', subtitle: 'Fundamental forces', content: 'Electric charge, Coulomb\'s Law, electric fields, electric potential, current, resistance, Ohm\'s Law, basic circuits, magnetic fields, electromagnetism.' }, { id: 'phy8', title: 'Modern Physics', subtitle: 'Quantum and relativity', content: 'Introduction to quantum mechanics (Planck, Bohr model, wave-particle duality), special relativity (time dilation, length contraction).' }, ] } ],
+       algebra: [ { subsection: 'Algebra', lessons: [ { id: 'alg1', title: 'Linear Equations', subtitle: 'Solving for unknowns', content: 'Solving one-variable and two-variable linear equations, systems of linear equations (substitution, elimination).' }, { id: 'alg2', title: 'Quadratic Equations', subtitle: 'Second-degree polynomials', content: 'Solving by factoring, quadratic formula, completing the square, discriminant, graphing parabolas.' }, { id: 'alg3', title: 'Polynomials', subtitle: 'Expressions with variables', content: 'Operations with polynomials, factoring polynomials, polynomial division, Remainder and Factor theorems.' }, { id: 'alg4', title: 'Inequalities', subtitle: 'Comparing expressions', content: 'Solving linear and quadratic inequalities, absolute value inequalities.' }, { id: 'alg5', title: 'Matrices', subtitle: 'Arrays of numbers', content: 'Matrix operations (addition, subtraction, multiplication), determinants, inverse matrices, solving systems using matrices.' }, { id: 'alg6', title: 'Sequences & Series', subtitle: 'Ordered lists and sums', content: 'Arithmetic and geometric sequences and series, sum formulas, infinite geometric series.' }, { id: 'alg7', title: 'Complex Numbers', subtitle: 'Numbers with imaginary parts', content: 'Operations with complex numbers, graphical representation, polar form.' }, { id: 'alg8', title: 'Logarithms', subtitle: 'Exponents inverse', content: 'Properties of logarithms, solving logarithmic and exponential equations, change of base.' }, ] } ],
+       geometry: [ { subsection: 'Geometry', lessons: [ { id: 'geo1', title: 'Triangles', subtitle: 'Three-sided polygons', content: 'Types of triangles, properties, congruence, similarity, Pythagorean theorem, trigonometric ratios (sine, cosine, tangent).' }, { id: 'geo2', title: 'Circles', subtitle: 'Properties of circles', content: 'Radius, diameter, circumference, area, arcs, sectors, tangents, secants, chords, inscribed angles.' }, { id: 'geo3', title: 'Polygons', subtitle: 'Closed shapes with straight sides', content: 'Quadrilaterals (parallelograms, rectangles, squares, rhombuses, trapezoids), regular polygons, sum of interior/exterior angles.' }, { id: 'geo4', title: 'Coordinate Geometry', subtitle: 'Geometry using coordinates', content: 'Distance formula, midpoint formula, slope, equations of lines, equations of circles.' }, { id: 'geo5', title: 'Solid Geometry', subtitle: 'Three-dimensional shapes', content: 'Volume and surface area of prisms, cylinders, pyramids, cones, spheres.' }, { id: 'geo6', title: 'Trigonometry Basics', subtitle: 'Angles and sides of triangles', content: 'Unit circle, radians, graphs of trigonometric functions, basic identities.' }, { id: 'geo7', title: 'Vectors', subtitle: 'Magnitude and direction', content: 'Vector addition, scalar multiplication, dot product, cross product (intro).' }, { id: 'geo8', title: 'Transformations', subtitle: 'Moving shapes', content: 'Translations, rotations, reflections, dilations.' }, ] } ],
+       calculus: [ { subsection: 'Calculus', lessons: [ { id: 'cal1', title: 'Derivatives', subtitle: 'Rates of change', content: 'Limit definition of derivative, differentiation rules (power, product, quotient, chain), applications (velocity, acceleration, optimization).' }, { id: 'cal2', title: 'Integrals', subtitle: 'Accumulation and area', content: 'Definite and indefinite integrals, Fundamental Theorem of Calculus, integration techniques (substitution), applications (area, volume).' }, { id: 'cal3', title: 'Limits', subtitle: 'Approaching values', content: 'Intuitive understanding of limits, limit laws, continuity, L\'Hopital\'s Rule.' }, { id: 'cal4', title: 'Differential Equations', subtitle: 'Equations with derivatives', content: 'Introduction to ordinary differential equations, separable equations, first-order linear equations.' }, { id: 'cal5', title: 'Multivariable Calculus', subtitle: 'Calculus in higher dimensions', content: 'Partial derivatives, multiple integrals, vector calculus (intro).' }, { id: 'cal6', title: 'Sequences & Series of Functions', subtitle: 'Convergence of functions', content: 'Taylor series, Maclaurin series, power series, convergence tests.' }, { id: 'cal7', title: 'Applications of Derivatives', subtitle: 'Optimization, related rates', content: 'Finding maxima/minima, curve sketching, related rates problems.' }, { id: 'cal8', title: 'Applications of Integrals', subtitle: 'Area, volume, work', content: 'Area between curves, volumes of solids of revolution, work, arc length.' }, ] } ],
+       history: [ { subsection: 'History', lessons: [ { id: 'hist1', title: 'Ancient India', subtitle: 'Indus Valley, Mauryas, Guptas', content: 'Harappan Civilization, Vedic Period, rise of Mahajanapadas, Mauryan Empire (Ashoka), Gupta Empire (Golden Age).' }, { id: 'hist2', title: 'Medieval India', subtitle: 'Sultanates, Mughals', content: 'Delhi Sultanate, Vijayanagara Empire, Bahmani Kingdom, Mughal Empire (Babur to Aurangzeb), Marathas.' }, { id: 'hist3', title: 'Modern India', subtitle: 'British Raj, Independence', content: 'Arrival of Europeans, British East India Company, Sepoy Mutiny (1857), Indian National Congress, Freedom Struggle (Gandhi), Partition, Independence.' }, { id: 'hist4', title: 'World History I', subtitle: 'Ancient Civilizations to Middle Ages', content: 'Mesopotamia, Egypt, Greece, Rome, Rise of Christianity and Islam, Feudalism in Europe, Byzantine Empire.' }, { id: 'hist5', title: 'World History II', subtitle: 'Renaissance to Modern Era', content: 'Renaissance, Reformation, Age of Exploration, Enlightenment, Industrial Revolution, World Wars, Cold War.' }, { id: 'hist6', title: 'Indian National Movement', subtitle: 'Struggle for freedom', content: 'Early nationalist movements, Gandhian era (Non-Cooperation, Civil Disobedience, Quit India), role of key leaders.' }, { id: 'hist7', title: 'Post-Independence India', subtitle: 'Nation building challenges', content: 'Integration of princely states, Constitution making, economic policies, foreign policy (NAM), major conflicts.' }, { id: 'hist8', title: 'Historical Theories', subtitle: 'Understanding historical interpretation', content: 'Historiography, different schools of thought (Marxist, Subaltern, etc.), primary vs. secondary sources.' }, ] } ],
+       geography: [ { subsection: 'Geography', lessons: [ { id: 'geosoc1', title: 'Physical Features', subtitle: 'Landforms and relief', content: 'Mountains, plateaus, plains, rivers, deserts, oceans, and their formation processes.' }, { id: 'geosoc2', title: 'Climate and Vegetation', subtitle: 'Weather patterns and plant life', content: 'Factors affecting climate, climate zones, types of natural vegetation (forests, grasslands, deserts).' }, { id: 'geosoc3', title: 'Natural Resources', subtitle: 'Earths materials and energy', content: 'Renewable and non-renewable resources, minerals, water resources, forests, conservation.' }, { id: 'geosoc4', title: 'Human Geography', subtitle: 'Population, culture, settlement', content: 'Population distribution and density, migration, human settlements (rural and urban), cultural landscapes.' }, { id: 'geosoc5', title: 'Economic Geography', subtitle: 'Location of economic activities', content: 'Primary, secondary, tertiary activities, agriculture, industries, trade, transport.' }, { id: 'geosoc6', title: 'Environmental Geography', subtitle: 'Human-environment interactions', content: 'Pollution, deforestation, climate change, sustainable development, environmental conservation.' }, { id: 'geosoc7', title: 'Map Reading', subtitle: 'Interpreting maps', content: 'Types of maps, map scales, symbols, latitude and longitude, direction, map projections.' }, { id: 'geosoc8', title: 'GIS Basics', subtitle: 'Geographic Information Systems', content: 'Introduction to GIS, data layers, spatial analysis, applications of GIS.' }, ] } ],
+       civics: [ { subsection: 'Civics', lessons: [ { id: 'civ1', title: 'Constitution', subtitle: 'Fundamental laws of a country', content: 'What is a constitution, why do we need it, key features of the Indian Constitution, Preamble, Fundamental Rights and Duties.' }, { id: 'civ2', title: 'Government Types', subtitle: 'Democracy, Monarchy, etc.', content: 'Forms of government: democracy, monarchy, dictatorship, parliamentary vs. presidential systems.' }, { id: 'civ3', title: 'Rights and Duties', subtitle: 'Citizen responsibilities and entitlements', content: 'Understanding fundamental rights, human rights, and the corresponding duties of citizens.' }, { id: 'civ4', title: 'Democracy', subtitle: 'Rule by the people', content: 'Principles of democracy, elections, political parties, role of media, challenges to democracy.' }, { id: 'civ5', title: 'Federalism', subtitle: 'Division of powers', content: 'Meaning of federalism, division of powers between central and state governments in India.' }, { id: 'civ6', title: 'Local Government', subtitle: 'Governance at the local level', content: 'Panchayati Raj system, municipalities, importance of local self-government.' }, { id: 'civ7', title: 'International Relations', subtitle: 'Interactions between states', content: 'Basic concepts, role of UN, India\'s foreign policy.' }, { id: 'civ8', title: 'Social Justice', subtitle: 'Fairness and equity in society', content: 'Concepts of equality, justice, addressing discrimination, affirmative action.' }, ] } ],
+       english: [ { subsection: 'English Grammar & Usage', lessons: [ { id: 'eng1', title: 'Tenses', subtitle: 'Verb forms indicating time', content: 'Present, Past, Future tenses and their aspects (simple, continuous, perfect, perfect continuous).' }, { id: 'eng2', title: 'Narration', subtitle: 'Reported speech', content: 'Direct and Indirect speech, rules for converting between them.' }, { id: 'eng3', title: 'Voice Change', subtitle: 'Active and Passive Voice', content: 'Rules for changing sentences from Active to Passive voice and vice-versa.' }, { id: 'eng4', title: 'Grammar Basics', subtitle: 'Fundamental rules', content: 'Parts of Speech (overview), sentence structure (subject, verb, object).' }, { id: 'eng5', title: 'Vocabulary Building', subtitle: 'Expanding word knowledge', content: 'Techniques like using a thesaurus, learning roots, prefixes, suffixes, context clues.' }, { id: 'eng6', title: 'Reading Comprehension', subtitle: 'Understanding written text', content: 'Strategies for effective reading, identifying main ideas, inference, summarizing.' }, { id: 'eng7', title: 'Writing Skills', subtitle: 'Effective communication', content: 'Paragraph writing, essay writing, letter writing, email etiquette.' }, { id: 'eng8', title: 'Literary Terms', subtitle: 'Figures of speech, genres', content: 'Simile, metaphor, personification, alliteration, irony, etc. Introduction to literary genres.' }, { id: 'eng9', title: 'Noun', subtitle: 'Person, place, thing, idea', content: 'Types of nouns (common, proper, collective, abstract, material), number, gender, case.' }, { id: 'eng10', title: 'Pronoun', subtitle: 'Replaces a noun', content: 'Types of pronouns (personal, possessive, reflexive, demonstrative, interrogative, relative).' }, { id: 'eng11', title: 'Verb', subtitle: 'Action or state of being', content: 'Types of verbs (transitive, intransitive, auxiliary, modal), subject-verb agreement.' }, { id: 'eng12', title: 'Adjective', subtitle: 'Describes a noun', content: 'Types of adjectives, degrees of comparison.' }, { id: 'eng13', title: 'Adverb', subtitle: 'Modifies verbs, adjectives, adverbs', content: 'Types of adverbs, position of adverbs.' }, { id: 'eng14', title: 'Preposition', subtitle: 'Shows relationship (location, time)', content: 'Common prepositions and their usage.' }, { id: 'eng15', title: 'Conjunction', subtitle: 'Connects words, phrases, clauses', content: 'Coordinating, subordinating, and correlative conjunctions.' }, { id: 'eng16', title: 'Interjection', subtitle: 'Expresses strong emotion', content: 'Common interjections and their usage.' }, ] } ],
+       hindi: [ { subsection: 'Hindi Grammar & Usage', lessons: [ { id: 'hin1', title: 'अलंकार', subtitle: 'Figures of Speech', content: 'शब्दालंकार (अनुप्रास, यमक, श्लेष) और अर्थालंकार (उपमा, रूपक, उत्प्रेक्षा, अतिशयोक्ति, मानवीकरण) के उदाहरण सहित विस्तृत विवरण।' }, { id: 'hin2', title: 'समास', subtitle: 'Compound Words', content: 'समास के भेद (अव्ययीभाव, तत्पुरुष, कर्मधारय, द्विगु, द्वंद्व, बहुव्रीहि) और उनके विग्रह।' }, { id: 'hin3', title: 'उपसर्ग और प्रत्यय', subtitle: 'Prefixes and Suffixes', content: 'उपसर्ग और प्रत्यय की परिभाषा, भेद, और उदाहरण।' }, { id: 'hin4', title: 'संधि', subtitle: 'Joining of Sounds', content: 'संधि के भेद (स्वर, व्यंजन, विसर्ग) और उनके नियम, उदाहरण सहित।' }, { id: 'hin5', title: 'विलोम शब्द', subtitle: 'Antonyms', content: 'महत्वपूर्ण विलोम शब्दों की सूची और अभ्यास।' }, { id: 'hin6', title: 'पर्यायवाची शब्द', subtitle: 'Synonyms', content: 'महत्वपूर्ण पर्यायवाची शब्दों की सूची और अभ्यास।' }, { id: 'hin7', title: 'मुहावरे और लोकोक्तियाँ', subtitle: 'Idioms and Proverbs', content: 'अर्थ और वाक्य प्रयोग सहित महत्वपूर्ण मुहावरे और लोकोक्तियाँ।' }, { id: 'hin8', title: 'पत्र लेखन', subtitle: 'Letter Writing', content: 'औपचारिक और अनौपचारिक पत्र लेखन के प्रारूप और उदाहरण।' }, { id: 'hin9', title: 'संज्ञा', subtitle: 'Noun', content: 'संज्ञा की परिभाषा, भेद (व्यक्तिवाचक, जातिवाचक, भाववाचक, समूहवाचक, द्रव्यवाचक), लिंग, वचन, कारक।' }, { id: 'hin10', title: 'सर्वनाम', subtitle: 'Pronoun', content: 'सर्वनाम की परिभाषा, भेद (पुरुषवाचक, निश्चयवाचक, अनिश्चयवाचक, संबंधवाचक, प्रश्नवाचक, निजवाचक)।' }, { id: 'hin11', title: 'क्रिया', subtitle: 'Verb', content: 'क्रिया की परिभाषा, भेद (सकर्मक, अकर्मक, प्रेरणार्थक, नामधातु), काल।' }, { id: 'hin12', title: 'विशेषण', subtitle: 'Adjective', content: 'विशेषण की परिभाषा, भेद (गुणवाचक, संख्यावाचक, परिमाणवाचक, सार्वनामिक), अवस्थाएँ।' }, { id: 'hin13', title: 'क्रियाविशेषण', subtitle: 'Adverb', content: 'क्रियाविशेषण की परिभाषा, भेद (कालवाचक, स्थानवाचक, रीतिवाचक, परिमाणवाचक)।' }, { id: 'hin14', title: 'संबंधबोधक', subtitle: 'Postposition/Preposition', content: 'संबंधबोधक अव्यय की परिभाषा और प्रयोग।' }, { id: 'hin15', title: 'समुच्चयबोधक', subtitle: 'Conjunction', content: 'समुच्चयबोधक अव्यय की परिभाषा और भेद।' }, { id: 'hin16', title: 'विस्मयादिबोधक', subtitle: 'Interjection', content: 'विस्मयादिबोधक अव्यय की परिभाषा और प्रयोग।' }, ] } ],
+       sanskrit: [ { subsection: 'Sanskrit Grammar & Usage', lessons: [ { id: 'san1', title: 'धातुरूप', subtitle: 'Verb Conjugations', content: 'लट्, लृट्, लङ्, लोट्, विधिलिङ् लकार में प्रमुख धातुओं (भू, पठ्, गम्, अस्, कृ) के रूप।' }, { id: 'san2', title: 'विभक्ति प्रयोग', subtitle: 'Case Endings Usage', content: 'कारक और विभक्तियों का संबंध, प्रमुख विभक्तियों का वाक्यों में प्रयोग।' }, { id: 'san3', title: 'संधि', subtitle: 'Euphonic Combination', content: 'स्वर संधि (दीर्घ, गुण, वृद्धि, यण्, अयादि), व्यंजन संधि, विसर्ग संधि के प्रमुख नियम और उदाहरण।' }, { id: 'san4', title: 'कारक', subtitle: 'Grammatical Cases', content: 'कर्ता, कर्म, करण, सम्प्रदान, अपादान, संबंध, अधिकरण कारकों का परिचय और चिह्न।' }, { id: 'san5', title: 'समास', subtitle: 'Compound Words', content: 'अव्ययीभाव, तत्पुरुष, कर्मधारय, द्विगु, द्वंद्व, बहुव्रीहि समासों का परिचय और विग्रह।' }, { id: 'san6', title: 'प्रत्यय', subtitle: 'Suffixes', content: 'कृत् प्रत्यय (क्त, क्तवतु, शतृ, शानच्, तुमुन्, क्त्वा, ल्यप्), तद्धित प्रत्यय (मतुप्, तरप्, तमप्) का परिचय।' }, { id: 'san7', title: 'उपसर्ग', subtitle: 'Prefixes', content: 'प्रमुख संस्कृत उपसर्ग और उनके अर्थ।' }, { id: 'san8', title: 'अव्यय', subtitle: 'Indeclinables', content: 'प्रमुख अव्यय शब्द और उनका वाक्यों में प्रयोग।' }, { id: 'san9', title: 'राम शब्दरूप', subtitle: 'Declension of Rama', content: 'अकारान्त पुल्लिंग राम शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san10', title: 'लता शब्दरूप', subtitle: 'Declension of Lata', content: 'आकारान्त स्त्रीलिंग लता शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san11', title: 'मुनि शब्दरूप', subtitle: 'Declension of Muni', content: 'इकारान्त पुल्लिंग मुनि शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san12', title: 'नदी शब्दरूप', subtitle: 'Declension of Nadi', content: 'ईकारान्त स्त्रीलिंग नदी शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san13', title: 'भानु शब्दरूप', subtitle: 'Declension of Bhanu', content: 'उकारान्त पुल्लिंग भानु शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san14', title: 'धेनु शब्दरूप', subtitle: 'Declension of Dhenu', content: 'उकारान्त स्त्रीलिंग धेनु शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san15', title: 'पितृ शब्दरूप', subtitle: 'Declension of Pitr', content: 'ऋकारान्त पुल्लिंग पितृ शब्द के सभी विभक्तियों और वचनों में रूप।' }, { id: 'san16', title: 'मातृ शब्दरूप', subtitle: 'Declension of Matr', content: 'ऋकारान्त स्त्रीलिंग मातृ शब्द के सभी विभक्तियों और वचनों में रूप।' }, ] } ],
+       html: [ { subsection: 'HTML', lessons: [ { id: 'html1', title: 'Basic Tags', subtitle: 'Fundamental HTML elements', content: 'Understanding `<html>`, `<head>`, `<title>`, `<body>`, headings (`<h1>`-`<h6>`), paragraphs (`<p>`), links (`<a>`), images (`<img>`).' }, { id: 'html2', title: 'Forms', subtitle: 'User input elements', content: 'Creating forms with `<form>`, `<input>` (various types like text, password, checkbox, radio, submit), `<textarea>`, `<select>`, `<label>`.' }, { id: 'html3', title: 'Media Elements', subtitle: 'Images, Audio, Video', content: 'Embedding images (`<img>`), audio (`<audio>`), and video (`<video>`) with controls and sources.' }, { id: 'html4', title: 'Semantic HTML', subtitle: 'Meaningful structure', content: 'Using tags like `<article>`, `<section>`, `<nav>`, `<aside>`, `<footer>`, `<header>` for better document structure and accessibility.' }, { id: 'html5', title: 'HTML5 APIs', subtitle: 'New browser capabilities', content: 'Introduction to Geolocation, Local Storage, Drag and Drop, Canvas.' }, { id: 'html6', title: 'Accessibility', subtitle: 'Making web accessible', content: 'ARIA attributes, alt text for images, keyboard navigation, semantic HTML for screen readers.' }, { id: 'html7', title: 'SEO Basics', subtitle: 'Search engine optimization', content: 'Meta tags (description, keywords), title optimization, semantic HTML for better indexing.' }, { id: 'html8', title: 'Best Practices', subtitle: 'Writing good HTML', content: 'Indentation, comments, validation, keeping code clean and maintainable.' }, ] } ],
+       css: [ { subsection: 'CSS', lessons: [ { id: 'css1', title: 'Selectors', subtitle: 'Targeting HTML elements', content: 'Type, class, ID selectors, attribute selectors, pseudo-classes, pseudo-elements, combinators.' }, { id: 'css2', title: 'Box Model', subtitle: 'Margin, Border, Padding, Content', content: 'Understanding how margin, border, padding, and content width/height interact. `box-sizing` property.' }, { id: 'css3', title: 'Flexbox/Grid', subtitle: 'Modern layout techniques', content: 'Introduction to Flexbox for 1D layouts and CSS Grid for 2D layouts. Key properties and use cases.' }, { id: 'css4', title: 'Responsive Design', subtitle: 'Adapting to screen sizes', content: 'Media queries, fluid layouts, viewport meta tag, mobile-first approach.' }, { id: 'css5', title: 'Animations & Transitions', subtitle: 'Adding motion', content: 'CSS transitions for smooth property changes, keyframe animations for complex sequences.' }, { id: 'css6', title: 'CSS Frameworks', subtitle: 'Bootstrap, Tailwind, etc.', content: 'Overview of popular CSS frameworks and their benefits (e.g., Bootstrap, Tailwind CSS).' }, { id: 'css7', title: 'Advanced Selectors', subtitle: 'Pseudo-classes, Pseudo-elements', content: 'In-depth look at `:nth-child`, `:hover`, `::before`, `::after`, etc.' }, { id: 'css8', title: 'Performance Optimization', subtitle: 'Writing efficient CSS', content: 'Minimizing selectors, reducing specificity, using shorthand properties, critical CSS.' }, ] } ],
+       javascript: [ { subsection: 'JavaScript', lessons: [ { id: 'js1', title: 'Variables & Data Types', subtitle: 'Storing information', content: '`var`, `let`, `const`, primitive types (string, number, boolean, null, undefined, symbol, bigint), objects.' }, { id: 'js2', title: 'Functions', subtitle: 'Reusable blocks of code', content: 'Function declarations, expressions, arrow functions, parameters, return values, scope.' }, { id: 'js3', title: 'DOM Manipulation', subtitle: 'Interacting with HTML', content: 'Selecting elements, changing content, modifying attributes, adding/removing elements, event listeners.' }, { id: 'js4', title: 'Events', subtitle: 'Responding to user actions', content: 'Event handling, common event types (click, mouseover, keydown), event object, event delegation.' }, { id: 'js5', title: 'Asynchronous JavaScript', subtitle: 'Handling delays (Promises, async/await)', content: 'Callbacks, Promises (`.then`, `.catch`, `.finally`), `async/await` syntax for cleaner async code.' }, { id: 'js6', title: 'ES6+ Features', subtitle: 'Modern JavaScript syntax', content: 'Template literals, destructuring, spread/rest operators, modules, classes.' }, { id: 'js7', title: 'Frameworks & Libraries', subtitle: 'React, Vue, Angular, jQuery', content: 'Brief overview of popular JS frameworks and libraries and their use cases.' }, { id: 'js8', title: 'Testing & Debugging', subtitle: 'Ensuring code quality', content: 'Browser developer tools, `console.log`, basic debugging techniques, introduction to testing concepts.' }, ] } ],
+       mindscience: [ { subsection: 'Mind Science', lessons: [ { id: 'mindsci1', title: 'Conscious vs Subconscious', subtitle: 'Levels of awareness', content: 'Exploring the functions and characteristics of the conscious and subconscious mind.' }, { id: 'mindsci2', title: 'Brain Waves', subtitle: 'Electrical activity of the brain', content: 'Understanding Beta, Alpha, Theta, Delta, and Gamma brainwave states and their association with mental activities.' }, { id: 'mindsci3', title: 'Thought Energy', subtitle: 'The power of thoughts', content: 'How thoughts can influence reality, manifestation, and the law of attraction concepts.' }, { id: 'mindsci4', title: 'Neuroplasticity', subtitle: 'The brains ability to change', content: 'How the brain can reorganize itself by forming new neural connections throughout life.' }, { id: 'mindsci5', title: 'Cognitive Biases', subtitle: 'Systematic errors in thinking', content: 'Common cognitive biases (confirmation bias, anchoring, etc.) and how they affect decision-making.' }, { id: 'mindsci6', title: 'Emotional Intelligence', subtitle: 'Understanding and managing emotions', content: 'Key components of EI: self-awareness, self-regulation, social skills, empathy, motivation.' }, { id: 'mindsci7', title: 'Mindfulness & Meditation', subtitle: 'Techniques for presence and calm', content: 'Introduction to mindfulness practices and various meditation techniques for stress reduction and focus.' }, { id: 'mindsci8', title: 'Hypnosis Basics', subtitle: 'Focused attention state', content: 'Understanding hypnosis, myths vs. facts, and its potential applications.' }, ] } ],
+       memorymastery: [ { subsection: 'Memory Mastery', lessons: [ { id: 'memory1', title: 'Memory Palace', subtitle: 'Method of Loci', content: 'A mnemonic device that involves visualizing a familiar place and associating items to remember with specific locations within it.' }, { id: 'memory2', title: 'Mnemonics', subtitle: 'Memory aids', content: 'Various mnemonic techniques like acronyms, acrostics, rhymes, and chunking.' }, { id: 'memory3', title: 'Study Hacks', subtitle: 'Effective learning strategies', content: 'Tips and tricks for efficient studying, note-taking, and exam preparation.' }, { id: 'memory4', title: 'Spaced Repetition', subtitle: 'Reviewing at increasing intervals', content: 'A learning technique that incorporates increasing intervals of time between subsequent reviews of previously learned material.' }, { id: 'memory5', title: 'Active Recall', subtitle: 'Retrieving information from memory', content: 'A study method that involves actively stimulating memory during the learning process, e.g., through self-testing.' }, { id: 'memory6', title: 'Speed Reading Techniques', subtitle: 'Reading faster with comprehension', content: 'Techniques to increase reading speed while maintaining or improving comprehension, like reducing subvocalization and using pointers.' }, { id: 'memory7', title: 'Mind Mapping', subtitle: 'Visual organization of information', content: 'A diagram used to visually organize information, often created around a single concept, drawn as an image in the center of a blank page, to which associated representations of ideas such as images, words and parts of words are added.' }, { id: 'memory8', title: 'Long-Term Memory Strategies', subtitle: 'Encoding information for durability', content: 'Techniques for deep processing, elaboration, and associating new information with existing knowledge to improve long-term retention.' }, ] } ],
+       story: [ { subsection: 'Short Stories', lessons: [ { id: 'short1', title: 'The Old Man and the Sea', subtitle: 'Ernest Hemingway', content: 'Summary, themes (perseverance, dignity, man vs. nature), and analysis of Hemingway\'s classic novella.' }, { id: 'short2', title: 'The Gift of the Magi', subtitle: 'O. Henry', content: 'Plot summary, themes of love, sacrifice, and irony in O. Henry\'s famous Christmas story.' }, { id: 'short3', title: 'A Retrieved Reformation', subtitle: 'O. Henry', content: 'Story of Jimmy Valentine, a safecracker who tries to go straight. Themes of redemption and love.' }, { id: 'short4', title: 'The Tell-Tale Heart', subtitle: 'Edgar Allan Poe', content: 'A chilling tale of guilt and madness. Analysis of Poe\'s Gothic style and psychological horror.' }, { id: 'short5', title: 'The Lottery', subtitle: 'Shirley Jackson', content: 'A disturbing story about a seemingly normal village ritual. Themes of tradition, conformity, and senseless violence.' }, { id: 'short6', title: 'Hills Like White Elephants', subtitle: 'Ernest Hemingway', content: 'A minimalist story about a couple discussing an unspoken issue. Analysis of subtext and Hemingway\'s "iceberg theory."' }, { id: 'short7', title: 'The Necklace', subtitle: 'Guy de Maupassant', content: 'A story about pride, materialism, and a costly mistake. Themes of appearance vs. reality and social class.' }, { id: 'short8', title: 'The Last Leaf', subtitle: 'O. Henry', content: 'A poignant story of sacrifice and hope, centered around artists in Greenwich Village.' }, ] }, { subsection: 'Moral Stories', lessons: [ { id: 'moral1', title: 'The Tortoise and the Hare', subtitle: 'Aesop\'s Fable', content: 'The classic fable teaching that "slow and steady wins the race." Moral: Perseverance and consistency are more important than raw talent without effort.' }, { id: 'moral2', title: 'The Boy Who Cried Wolf', subtitle: 'Aesop\'s Fable', content: 'A shepherd boy repeatedly tricks villagers into thinking a wolf is attacking his flock. Moral: Liars are not believed even when they speak the truth.' }, { id: 'moral3', title: 'The Lion and the Mouse', subtitle: 'Aesop\'s Fable', content: 'A lion spares a mouse, who later repays the kindness by freeing the lion from a hunter\'s net. Moral: Acts of kindness, no matter how small, are never wasted and can be reciprocated in unexpected ways.' }, { id: 'moral4', title: 'The Ant and the Grasshopper', subtitle: 'Aesop\'s Fable', content: 'An ant works hard all summer to store food, while a grasshopper sings. When winter comes, the ant is prepared, but the grasshopper is hungry. Moral: It is wise to prepare for the days of necessity.' }, { id: 'moral5', title: 'The Fox and the Grapes', subtitle: 'Aesop\'s Fable', content: 'A fox tries to reach some grapes, fails, and then declares they were probably sour anyway. Moral: It is easy to despise what you cannot get (sour grapes).' }, { id: 'moral6', title: 'The Goose That Laid the Golden Eggs', subtitle: 'Aesop\'s Fable', content: 'A man and his wife own a goose that lays golden eggs. Wanting to get all the gold at once, they kill the goose, only to find it empty. Moral: Greed can destroy the source of good fortune.' }, { id: 'moral7', title: 'Two Friends and a Bear', subtitle: 'Aesop\'s Fable', content: 'Two friends encounter a bear. One climbs a tree, the other plays dead. The bear sniffs the one on the ground and leaves. Moral: Misfortune tests the sincerity of friends; a friend in need is a friend indeed (or, conversely, be wary of fair-weather friends).' }, { id: 'moral8', title: 'The Honest Woodcutter', subtitle: 'Aesop-like Fable', content: 'A poor woodcutter loses his axe in a river. Mercury (or a god) appears and offers him a golden axe, then a silver one, both of which he refuses, admitting his was plain iron. For his honesty, he is given all three. Moral: Honesty is the best policy and is often rewarded.' }, ] } ],
+       thoughts: [ { subsection: 'Inspirational Thoughts', lessons: [ { id: 'inspire1', title: 'Believe in Yourself', subtitle: 'The power of self-confidence', content: 'Discussion on the importance of self-belief, overcoming self-doubt, and recognizing your own potential.' }, { id: 'inspire2', title: 'Never Give Up', subtitle: 'Perseverance and resilience', content: 'The value of persistence in the face of adversity, learning from failures, and maintaining determination towards goals.' }, { id: 'inspire3', title: 'Follow Your Dreams', subtitle: 'Pursuing passions and goals', content: 'Encouragement to identify and pursue one\'s passions and aspirations, even if they seem challenging.' }, { id: 'inspire4', title: 'The Power of Positivity', subtitle: 'Impact of a positive mindset', content: 'How a positive outlook can influence well-being, problem-solving, and overall life satisfaction. Techniques for cultivating positivity.' }, { id: 'inspire5', title: 'Embrace Change', subtitle: 'Adapting to new situations', content: 'Understanding that change is inevitable and learning to adapt, grow, and find opportunities within it.' }, { id: 'inspire6', title: 'Learn from Failure', subtitle: 'Turning setbacks into opportunities', content: 'Viewing failures not as endpoints but as valuable learning experiences that pave the way for future success.' }, { id: 'inspire7', title: 'Be Kind to Others', subtitle: 'The importance of compassion', content: 'The impact of kindness on both the giver and receiver, fostering empathy, and building stronger relationships.' }, { id: 'inspire8', title: 'Make a Difference', subtitle: 'Impacting the world positively', content: 'Exploring how even small actions can contribute to a larger positive impact on the community and the world.' }, ] }, { subsection: 'Philosophical Thoughts', lessons: [ { id: 'philosophy1', title: 'The Meaning of Life', subtitle: 'Existential questions', content: 'Exploring various philosophical perspectives on the purpose and meaning of human existence, from nihilism to existentialism to religious views.' }, { id: 'philosophy2', title: 'Ethics and Morality', subtitle: 'Principles of right and wrong', content: 'Introduction to ethical theories like utilitarianism, deontology, virtue ethics. Discussing moral dilemmas and decision-making.' }, { id: 'philosophy3', title: 'The Nature of Reality', subtitle: 'What is real?', content: 'Philosophical inquiries into ontology (what exists) and epistemology (how we know what exists). Idealism vs. materialism.' }, { id: 'philosophy4', title: 'Free Will vs Determinism', subtitle: 'Choice and causality', content: 'The debate over whether human actions are freely chosen or predetermined by preceding events and laws of nature.' }, { id: 'philosophy5', title: 'The Concept of Time', subtitle: 'Philosophical views on time', content: 'Exploring linear vs. cyclical time, presentism vs. eternalism, and the subjective experience of time.' }, { id: 'philosophy6', title: 'The Existence of God', subtitle: 'Arguments for and against', content: 'Overview of classical arguments for God\'s existence (ontological, cosmological, teleological) and arguments against (problem of evil).' }, { id: 'philosophy7', title: 'Consciousness', subtitle: 'The nature of awareness', content: 'The "hard problem" of consciousness, mind-body problem, theories of consciousness from philosophy and neuroscience.' }, { id: 'philosophy8', title: 'Logic and Reasoning', subtitle: 'Principles of valid thought', content: 'Introduction to deductive and inductive reasoning, logical fallacies, and the importance of critical thinking.' }, ] } ]
+    };
+
+    // --- Sidebar Navigation ---
+    function toggleSubsections(id) {
+      document.querySelectorAll('#sidebar .subsections').forEach(sec => {
+        if (sec.id !== id) sec.classList.remove('open');
+      });
+      const currentSubsections = document.getElementById(id);
+      if (currentSubsections) currentSubsections.classList.toggle('open');
+      document.querySelectorAll('#sidebar .lessons').forEach(ls => ls.classList.remove('open'));
+      closePopups();
+    }
+
+    function toggleLessons(id) {
+       const currentLessons = document.getElementById(id);
+       if(currentLessons) currentLessons.classList.toggle('open');
+       closePopups();
+    }
+
+    function showDetail(section, id) {
+      let foundLesson = null;
+      const sectionData = data[section];
+      if (sectionData) {
+        for (const subsection of sectionData) {
+          const lesson = subsection.lessons.find(l => l.id === id);
+          if (lesson) {
+            foundLesson = lesson;
+            break;
+          }
+        }
+      }
+
+      if (!foundLesson) {
+        updateMainContent('<div class="lesson-detail"><p>Lesson content not found.</p></div>', false);
+        return;
+      }
+      sidebar.classList.remove('open');
+      if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+      updateMainContent(`
+        <div class="lesson-detail">
+          <h2 class="lesson-title">${foundLesson.title}</h2>
+          ${foundLesson.subtitle ? `<p class="lesson-subtitle">${foundLesson.subtitle}</p>` : ''}
+          <div>${foundLesson.content || '<p>Content coming soon...</p>'}</div>
+        </div>
+      `, true); // true: this is lesson content, mark for backend translation
+    }
+
+    // --- Special Sections ---
+    function showDonation() {
+      sidebar.classList.remove('open');
+      if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+      updateMainContent(`
+        <div class="lesson-detail">
+            <h2 class="lesson-title">Support Gyan Path</h2>
+            <p>Your contribution helps us continue providing and improving this educational resource. Choose an area you'd like to support:</p>
+            <div class="donation-options" style="margin-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
+                <div>
+                    <h3>For Education</h3>
+                    <p>Help us expand lesson content, add new subjects, and improve interactive features.</p>
+                    <a href="https://www.buymeacoffee.com/sukanta" target="_blank" rel="noopener noreferrer" class="share-button">Donate for Education</a>
+                </div>
+                <div>
+                    <h3>For Society</h3>
+                    <p>Support initiatives to make knowledge more accessible to underprivileged communities and promote open learning.</p>
+                    <a href="https://www.buymeacoffee.com/sukanta" target="_blank" rel="noopener noreferrer" class="share-button">Donate for Society</a>
+                </div>
+                <div>
+                    <h3>For Environment</h3>
+                    <p>Contribute towards our efforts for a sustainable platform, such as using green hosting or offsetting our carbon footprint.</p>
+                    <a href="https://www.buymeacoffee.com/sukanta" target="_blank" rel="noopener noreferrer" class="share-button">Donate for Environment</a>
+                </div>
+            </div>
+            <p style="margin-top:1.5rem;"><small>(Note: Replace placeholder links with your actual donation URLs if different.)</small></p>
+        </div>
+      `, false);
+    }
+
+    function showPrivacyPolicy() {
+      sidebar.classList.remove('open');
+      if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+      updateMainContent(`
+        <div class="lesson-detail">
+          <h2 class="lesson-title">Privacy Policy</h2>
+          <p><strong>Last Updated: ${new Date().toLocaleDateString()}</strong></p>
+          <p>Welcome to Gyan Path ("the Application"). This privacy policy explains how we handle information when you use our application.</p>
+          <h3>Information We Collect</h3>
+          <p>We prioritize your privacy and aim to collect minimal data:</p>
+          <ul>
+              <li><strong>Theme Preference & Chat History:</strong> We use your browser's local storage only to save your preferred theme (light/dark mode) and your AI chat history. This information stays on your device and is not transmitted to our servers unless you interact with features requiring it (like the chat itself).</li>
+              <li><strong>No Personal Identification Information:</strong> We do not directly collect names, email addresses, or any other personally identifiable information unless you explicitly provide it through a future feature like a contact form (which is not currently implemented).</li>
+          </ul>
+          <h3>Third-Party Services & Data Processing</h3>
+          <ul>
+              <li><strong>Wikipedia Search:</strong> Your search terms are sent directly to the Wikipedia API to fetch results. We do not store your Wikipedia search history. Wikipedia's data handling is governed by their privacy policy.</li>
+              <li><strong>AI Chatbot (Google Gemini via Google Apps Script):</strong> Interactions with the AI chatbot (messages you send) are processed by our secure Google Apps Script backend, which then communicates with Google's Gemini API. Your API key for Gemini is kept private within the Apps Script. Google processes this data according to its <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>. Avoid sharing highly sensitive personal information in the chat.</li>
+<li><strong>Google Translate (Page Translation):</strong> If you use the Google Translate button (🌐) for whole-page translation, Google Translate processes the page content. This usage is subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy</a>.</li>
+<li><strong>Lingva/LibreTranslate (Content Snippet Translation via Google Apps Script):</strong> If you use the "LT" button, selected content snippets are sent to our secure Google Apps Script backend. The script then calls either the Lingva Translate API or the LibreTranslate API (libretranslate.de) as a fallback. The privacy policies of these respective services apply to the data they process. We do not store these translated snippets beyond the immediate request-response cycle.</li>
+</ul>
+<h3>Data Sharing</h3>
+<p>We do not sell or share your data (like theme preference or chat history stored locally) with third parties for marketing purposes. Data is shared with third-party APIs (Wikipedia, Google Gemini, Lingva, LibreTranslate) only as necessary for the application's core functionality as described above, and always via our secure backend where applicable (for Gemini and Lingva/LibreTranslate).</p>
+<h3>Security</h3>
+<p>We implement reasonable technical measures to protect data. Our Google Apps Script backend acts as a secure intermediary for API key-based services, ensuring your private API keys are not exposed client-side. However, no internet transmission or electronic storage is 100% secure.</p>
+<h3>Children's Privacy</h3>
+<p>This application is intended for a general audience and does not knowingly collect personal information from children under 13 (or the relevant age in your jurisdiction). If we become aware of such collection, we will take steps to delete the information.</p>
+<h3>Changes to This Policy</h3>
+<p>We may update this privacy policy from time to time. Changes will be posted on this page with an updated "Last Updated" date. Your continued use of the application after changes signifies your acceptance.</p>
+<h3>Contact Us</h3>
+<p>If you have any questions about this privacy policy, please contact us at gyan.path.contact@example.com (Please replace this with a real contact email if you plan to deploy this publicly).</p>
+</div>
+`, false);
+}
+
+function showShareOptions() {
+    sidebar.classList.remove('open');
+    if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+    const shareUrl = window.location.href;
+    const shareTitle = 'Gyan Path - Dynamic Lessons & AI';
+    const shareText = 'Check out Gyan Path! An app for learning various subjects with lessons, Wikipedia search, and an AI assistant.';
+    let shareContentHtml = `<div class="lesson-detail"><h2 class="lesson-title">Share Gyan Path</h2><p>Help others discover this learning resource!</p>`;
+    if (navigator.share) {
+        shareContentHtml += `<button id="nativeShareBtn" class="share-button">Share via System Dialog</button>`;
+    } else {
+        shareContentHtml += `<p>Share using:</p><div class="share-links" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 10px;">
+            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}" target="_blank" rel="noopener noreferrer" style="background-color:#1DA1F2;">Twitter</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}" target="_blank" rel="noopener noreferrer" style="background-color:#1877F2;">Facebook</a>
+            <a href="https://wa.me/?text=${encodeURIComponent(shareTitle + ' - ' + shareUrl)}" target="_blank" rel="noopener noreferrer" style="background-color:#25D366;">WhatsApp</a>
+            <a href="mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}" style="background-color:#777;">Email</a>
+            <button id="copyLinkBtn" class="share-button" style="background-color: var(--button-bg); padding: 8px 15px; margin-top:0;">Copy Link</button>
+        </div><p id="copyStatus"></p>`;
+    }
+    shareContentHtml += `</div>`;
+    updateMainContent(shareContentHtml, false);
+
+    const nativeShareBtn = document.getElementById('nativeShareBtn');
+    if (nativeShareBtn) {
+        nativeShareBtn.onclick = async () => {
+            try { await navigator.share({ title: shareTitle, text: shareText, url: shareUrl }); } catch (err) { console.error('Native share failed:', err); }
+        };
+    }
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    if (copyLinkBtn) {
+        copyLinkBtn.onclick = () => {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                const cs = document.getElementById('copyStatus'); if(cs) { cs.textContent = 'Link copied!'; cs.style.color = 'green'; setTimeout(() => cs.textContent = '', 3000); }
+            }, (err) => { const cs = document.getElementById('copyStatus'); if(cs) { cs.textContent = 'Failed to copy.'; cs.style.color = 'red';} console.error('Copy failed: ', err); });
+        };
+    }
+}
+
+// --- Wikipedia Search ---
+async function searchWikipedia() {
+    const searchTerm = wikiSearchInput.value.trim();
+    if (!searchTerm) {
+        updateMainContent('<div class="lesson-detail"><p>Please enter a term to search on Wikipedia.</p></div>', false);
+        return;
+    }
+    updateMainContent('<div class="lesson-detail"><p>Searching Wikipedia...</p></div>', false);
+    sidebar.classList.remove('open');
+    if (window.innerWidth > 768) mainContent.classList.remove('shifted');
+
+    try {
+        const response = await fetch(WIKIPEDIA_API_URL + encodeURIComponent(searchTerm));
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const wikiData = await response.json();
+        const pages = wikiData.query.pages;
+        const pageId = Object.keys(pages)[0];
+
+        if (!pages || pageId === "-1") {
+             updateMainContent(`<div class="lesson-detail"><h3>Wikipedia Search Results</h3><p>Sorry, no Wikipedia article found for "${searchTerm}".</p></div>`, true);
+        } else {
+            const page = pages[pageId];
+            updateMainContent(`
+                <div class="lesson-detail" id="wikiResult">
+                    <h3>Wikipedia: ${page.title}</h3>
+                    <p>${page.extract || 'No summary available for this topic.'}</p>
+                    <br>
+                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}" target="_blank" rel="noopener noreferrer" class="share-button" style="text-decoration: none;">Read full article on Wikipedia</a>
+                </div>
+            `, true); // true: this is wiki content, mark for backend translation
+        }
+    } catch (error) {
+        console.error("Error fetching Wikipedia data:", error);
+        updateMainContent(`<div class="lesson-detail"><p>Could not fetch Wikipedia results. Error: ${error.message}.</p></div>`, false);
+    }
+}
+wikiSearchBtn.addEventListener('click', searchWikipedia);
+wikiSearchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchWikipedia(); });
+
+// --- Chatbot Functionality ---
+function loadChatHistoryFromStorage() { // Renamed for clarity
+    const storedHistory = localStorage.getItem('gyanPathChatHistory');
+    if (storedHistory) {
+        chatHistory = JSON.parse(storedHistory);
+    } else { // Initialize with a welcome message if no history
+        const welcomeMsg = 'Hello! How can I help you today?';
+        chatHistory = [{ role: 'ai', text: welcomeMsg }];
+        saveChatHistory();
+    }
+}
+
+function renderChatHistoryToDOM() {
+    chatMessagesContainer.innerHTML = ''; // Clear before rendering
+    chatHistory.forEach(msg => addChatMessageToDOM(msg.text, msg.role, false)); // Don't scroll for each
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Scroll once after all rendered
+    chatRendered = true;
+}
+
+function saveChatHistory() {
+    if (chatHistory.length > MAX_CHAT_HISTORY) {
+        chatHistory = chatHistory.slice(chatHistory.length - MAX_CHAT_HISTORY);
+    }
+    localStorage.setItem('gyanPathChatHistory', JSON.stringify(chatHistory));
+}
+
+function addChatMessageToDOM(message, role, shouldScroll = true) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', role === 'user' ? 'user-message' : 'ai-message');
+    if (role === 'loading') messageDiv.classList.add('loading');
+    messageDiv.textContent = message;
+    chatMessagesContainer.appendChild(messageDiv);
+    if (shouldScroll) chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    return messageDiv;
+}
+
+chatBtn.addEventListener('click', () => {
+    closePopups();
+    chatWindow.classList.toggle('open');
+    if (chatWindow.classList.contains('open')) {
+       if (!chatRendered) renderChatHistoryToDOM(); // Render only if not already done
+       else chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+       chatInput.focus();
+    }
+});
+
+closeChatBtn.addEventListener('click', () => chatWindow.classList.remove('open'));
+
+clearChatHistoryBtn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to clear the chat history?")) {
+        const clearedMsg = 'Chat history cleared. How can I help you now?';
+        chatHistory = [{ role: 'ai', text: clearedMsg }];
+        saveChatHistory();
+        renderChatHistoryToDOM(); // Re-render with only the cleared message
+    }
+});
+
+async function handleSendChatMessage() {
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    addChatMessageToDOM(userMessage, 'user');
+    chatHistory.push({ role: 'user', text: userMessage });
+    saveChatHistory();
+    chatInput.value = '';
+    
+    const thinkingMessageDiv = addChatMessageToDOM('Thinking...', 'loading');
+    sendChatBtn.disabled = true;
+    chatInput.disabled = true;
+
+    try {
+        const res = await fetch(BACKEND_API_URL, {
+            method: "POST",
+            body: JSON.stringify({ type: "chat", message: userMessage }), 
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (thinkingMessageDiv && thinkingMessageDiv.parentNode === chatMessagesContainer) {
+            chatMessagesContainer.removeChild(thinkingMessageDiv);
+        }
+
+        const data = await res.json();
+        let aiReply = 'Sorry, I encountered an issue processing your request.';
+
+        if (res.ok && data.reply) {
+            aiReply = data.reply;
+        } else if (data.error) {
+            aiReply = 'AI Error: ' + data.error;
+            console.error('AI Chatbot Error from Apps Script:', data.error);
+        } else if (!res.ok) {
+            aiReply = 'Error communicating with AI service. Status: ' + res.status;
+            console.error('AI Chatbot Network Error:', res.status, await res.text().catch(()=>""));
+        } else {
+             console.error('AI Chatbot Unexpected Response:', data);
+        }
+        addChatMessageToDOM(aiReply, 'ai');
+        chatHistory.push({ role: 'ai', text: aiReply });
+        saveChatHistory();
+
+    } catch (error) {
+        if (thinkingMessageDiv && thinkingMessageDiv.parentNode === chatMessagesContainer) {
+            chatMessagesContainer.removeChild(thinkingMessageDiv);
+        }
+        const errorReply = 'Failed to connect to the AI service: ' + error.message;
+        addChatMessageToDOM(errorReply, 'ai');
+        chatHistory.push({ role: 'ai', text: errorReply });
+        saveChatHistory();
+        console.error("Chatbot fetch exception:", error);
+    } finally {
+        sendChatBtn.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+    }
+}
+
+sendChatBtn.addEventListener('click', handleSendChatMessage);
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendChatMessage();
+    }
+});
+
+// Initial load actions
+document.addEventListener('DOMContentLoaded', () => {
+    loadChatHistoryFromStorage(); // Load history into JS array, but don't render yet
+    
+    // Show initial welcome message in main content area if it's empty
+    if(mainContentArea.innerHTML.trim() === ''){
+        updateMainContent(`
+            <div class="lesson-detail">
+                <h2 class="lesson-title">Welcome to Gyan Path!</h2>
+                <p>Select a lesson from the sidebar menu (☰), search Wikipedia above, or open the AI chat assistant (💬) at the bottom right.</p>
+                <p>Use the translate buttons (🌐 for Google, LT for Lingva/LibreTranslate via backend) in the header to change the language.</p>
+                <p>Explore various subjects and enhance your knowledge.</p>
+            </div>
+        `, false); // false: this is not lesson/wiki, don't mark for backend translation
+    }
+});
+
+</script>
+</body>
+</html>
