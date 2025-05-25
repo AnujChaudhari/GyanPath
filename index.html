@@ -1015,7 +1015,7 @@ async function searchWikipedia() {
                     <h3>Wikipedia: ${page.title}</h3>
                     <p>${page.extract || 'No summary available for this topic.'}</p>
                     <br>
-                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}" target="_blank" rel="noopener noreferrer" class="share-button" style="text-decoration: none;">Read full article on Wikipedia</a>
+                    <a href="https://hi.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}" target="_blank" rel="noopener noreferrer" class="share-button" style="text-decoration: none;">Read full article on Wikipedia</a>
                 </div>
             `, true); // true: this is wiki content, mark for backend translation
         }
